@@ -32,10 +32,12 @@ public class PositionsController : MonoBehaviour
 		{
 			GameObject heroPosition = Instantiate(_heroPosition, transform.position, Quaternion.identity) as GameObject;
 			heroPosition.transform.SetParent(transform);
+			heroPosition.GetComponent<Rarity>().rarity = rarity;
 
 			GameObject heroListItem = Instantiate(_heroListItem, _heroListItemContainer.transform.position, Quaternion.identity) as GameObject;
 			heroListItem.transform.SetParent(_heroListItemContainer.transform);
 			heroListItem.GetComponentInChildren<Text>().text = rarityNames[rarity];
+			heroListItem.GetComponent<Rarity>().rarity = rarity;
 		}
 			
 		//StartCoroutine(InstantiateHeroListItems());
@@ -43,7 +45,27 @@ public class PositionsController : MonoBehaviour
 
 
 
+	public void FilterHeroes(int rarity)
+	{
+		Debug.Log(rarity);
 
+		foreach (Transform heroPosition in transform)
+		{
+//			if (transform.GetComponent<Rarity>().rarity != rarity)
+//			{
+//				Transform omg = _heroListItemContainer.transform.GetChild(transform.GetSiblingIndex());
+//				omg.gameObject.SetActive(false);
+//			}
+//			else
+//			{
+//				Transform omg = _heroListItemContainer.transform.GetChild(transform.GetSiblingIndex());
+//				omg.gameObject.SetActive(true);
+//			}
+
+
+			//transform.GetSiblingIndex();
+		}
+	}
 
 
 

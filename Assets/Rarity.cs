@@ -3,5 +3,5 @@ using System.Collections;
 
 public class Rarity : MonoBehaviour 
 {
-	public string rarity;
+	public int rarity;
 }
