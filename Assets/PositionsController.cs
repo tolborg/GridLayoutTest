@@ -10,79 +10,94 @@ public class PositionsController : MonoBehaviour
 	public GameObject _heroListItemContainer;
 
 	public int _heroesCount;
-
-	private Dictionary<int,string> rarityNames = new Dictionary<int,string>();
 	private int[] rarities = { 1,1,2,3,2,1,2,3,2,3,2,2,3,3,1,1,2,2,3,3,3,2,1,1,2,3 };
 
 
 	void Start() 
 	{
-		rarityNames.Add(1, "Common");
-		rarityNames.Add(2, "Rare");
-		rarityNames.Add(3, "Epic");
-
-		InstantiateHeroes();
-	}
-
-
-
-	void InstantiateHeroes()
-	{
 		foreach (int rarity in rarities)
 		{
-			GameObject heroPosition = Instantiate(_heroPosition, transform.position, Quaternion.identity) as GameObject;
-			heroPosition.transform.SetParent(transform);
-			heroPosition.GetComponent<Rarity>().rarity = rarity;
-
 			GameObject heroListItem = Instantiate(_heroListItem, _heroListItemContainer.transform.position, Quaternion.identity) as GameObject;
 			heroListItem.transform.SetParent(_heroListItemContainer.transform);
-			heroListItem.GetComponentInChildren<Text>().text = rarityNames[rarity];
-			heroListItem.GetComponent<Rarity>().rarity = rarity;
+			heroListItem.GetComponentInChildren<Text>().text = rarity.ToString();
+
+			GameObject heroPosition = Instantiate(_heroPosition, transform.position, Quaternion.identity) as GameObject;
+			heroPosition.transform.SetParent(transform);
+			heroPosition.GetComponent<HeroPositionController>()._rarity = rarity;
+			heroPosition.GetComponent<HeroPositionController>()._heroListItem = heroListItem;
 		}
-			
-		//StartCoroutine(InstantiateHeroListItems());
 	}
 
 
 
 	public void FilterHeroes(int rarity)
 	{
-		Debug.Log(rarity);
-
 		foreach (Transform heroPosition in transform)
 		{
-//			if (transform.GetComponent<Rarity>().rarity != rarity)
-//			{
-//				Transform omg = _heroListItemContainer.transform.GetChild(transform.GetSiblingIndex());
-//				omg.gameObject.SetActive(false);
-//			}
-//			else
-//			{
-//				Transform omg = _heroListItemContainer.transform.GetChild(transform.GetSiblingIndex());
-//				omg.gameObject.SetActive(true);
-//			}
-
-
-			//transform.GetSiblingIndex();
+			if (rarity == 0 || heroPosition.GetComponent<HeroPositionController>()._rarity == rarity)
+			{
+				heroPosition.gameObject.SetActive(true);
+			}
+			else
+			{
+				heroPosition.gameObject.SetActive(false);
+			}
 		}
+			
+		Canvas.ForceUpdateCanvases();
+		transform.GetComponent<GridLayoutGroup>().enabled = false;
+		_heroListItemContainer.GetComponent<GridLayoutGroup>().enabled = false;
+
+		StartCoroutine(FadeOutItems(2f));
 	}
 
 
 
+	IEnumerator FadeOutItems(float time)
+	{
+		float i = 0;
+		float rate = 1 / time;
+
+		while (i < 1)
+		{
+			foreach (Transform heroPosition in transform)
+			{
+				GameObject heroListItem = heroPosition.GetComponent<HeroPositionController>()._heroListItem;
+
+				if (!heroPosition.gameObject.activeSelf)
+				{
+					heroListItem.GetComponent<CanvasGroup>().alpha = 1 - i;
+				}
+			}
+			i += Time.deltaTime * rate;
+			yield return null;
+		}
+
+		Debug.Log("Done fading!");
+		StartCoroutine(MoveItems(2f));			
+	}
 
 
-//	IEnumerator InstantiateHeroListItems()
-//	{
-//		yield return new WaitForEndOfFrame();
-//
-//		foreach (Transform child in transform)
-//		{
-//
-//			GameObject lolChild = Instantiate(heroListItem, heroListItemContainer.transform.position, Quaternion.identity) as GameObject;
-//			lolChild.transform.SetParent(heroListItemContainer.transform);
-//
-//		}
-//	}
 
+	IEnumerator MoveItems(float time)
+	{
+		float i = 0;
+		float rate = 1 / time;
+
+		while (i < 1)
+		{
+			foreach (Transform heroPosition in transform)
+			{
+				// Move items!
+			}
+				
+			i += Time.deltaTime * rate;
+			yield return null;
+		}
+
+		Debug.Log("Done moving!");
+		transform.GetComponent<GridLayoutGroup>().enabled = true;
+		_heroListItemContainer.GetComponent<GridLayoutGroup>().enabled = true;
+	}
 
 }
