@@ -8,6 +8,9 @@ public class PositionsController : MonoBehaviour
 	public GameObject _heroPosition;
 	public GameObject _heroListItem;
 	public GameObject _heroListItemContainer;
+	public AnimationCurve _moveCurve;
+	public float _moveTime;
+	public float _fadeTime;
 
 	public int _heroesCount;
 	private int[] rarities = { 1,1,2,3,2,1,2,3,2,3,2,2,3,3,1,1,2,2,3,3,3,2,1,1,2,3 };
@@ -44,22 +47,37 @@ public class PositionsController : MonoBehaviour
 			}
 		}
 			
-		Canvas.ForceUpdateCanvases();
-		transform.GetComponent<GridLayoutGroup>().enabled = false;
-		_heroListItemContainer.GetComponent<GridLayoutGroup>().enabled = false;
-
-		StartCoroutine(FadeOutItems(2f));
+		DisableGrids();
+		StartCoroutine(FadeOutItems());
+		StartCoroutine(MoveItems());
 	}
 
 
 
-	IEnumerator FadeOutItems(float time)
+	void DisableGrids()
+	{
+		Canvas.ForceUpdateCanvases();
+		transform.GetComponent<GridLayoutGroup>().enabled = false;
+		_heroListItemContainer.GetComponent<GridLayoutGroup>().enabled = false;
+	}
+
+	void EnableGrids()
+	{
+		transform.GetComponent<GridLayoutGroup>().enabled = true;
+		_heroListItemContainer.GetComponent<GridLayoutGroup>().enabled = true;
+	}
+
+
+
+	IEnumerator FadeOutItems()
 	{
 		float i = 0;
-		float rate = 1 / time;
+		float rate = 1 / _fadeTime;
 
 		while (i < 1)
 		{
+			i += Time.deltaTime * rate;
+
 			foreach (Transform heroPosition in transform)
 			{
 				GameObject heroListItem = heroPosition.GetComponent<HeroPositionController>()._heroListItem;
@@ -67,37 +85,43 @@ public class PositionsController : MonoBehaviour
 				if (!heroPosition.gameObject.activeSelf)
 				{
 					heroListItem.GetComponent<CanvasGroup>().alpha = 1 - i;
+
+					if (i >= 1)
+					{
+						heroListItem.SetActive(false);
+					}
 				}
 			}
-			i += Time.deltaTime * rate;
 			yield return null;
-		}
-
-		Debug.Log("Done fading!");
-		StartCoroutine(MoveItems(2f));			
+		}			
 	}
 
 
 
-	IEnumerator MoveItems(float time)
+	IEnumerator MoveItems()
 	{
 		float i = 0;
-		float rate = 1 / time;
+		float rate = 1 / _moveTime;
 
 		while (i < 1)
 		{
+			i += Time.deltaTime * rate;
+
 			foreach (Transform heroPosition in transform)
 			{
-				// Move items!
+				GameObject heroListItem = heroPosition.GetComponent<HeroPositionController>()._heroListItem;
+
+				if (heroPosition.gameObject.activeSelf)
+				{
+					heroListItem.SetActive(true);
+					heroListItem.GetComponent<CanvasGroup>().alpha = 1;
+					heroListItem.transform.position = Vector3.Lerp(heroListItem.transform.position, heroPosition.transform.position, i);
+				}
 			}
-				
-			i += Time.deltaTime * rate;
 			yield return null;
 		}
 
-		Debug.Log("Done moving!");
-		transform.GetComponent<GridLayoutGroup>().enabled = true;
-		_heroListItemContainer.GetComponent<GridLayoutGroup>().enabled = true;
+		EnableGrids();
 	}
 
 }
